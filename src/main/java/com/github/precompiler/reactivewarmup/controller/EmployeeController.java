@@ -1,6 +1,7 @@
 package com.github.precompiler.reactivewarmup.controller;
 
 import com.github.precompiler.reactivewarmup.model.Employee;
+import com.github.precompiler.reactivewarmup.repo.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Stream;
 
 /**
  * @author Richard Li
@@ -18,16 +18,20 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
+    public EmployeeController(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
     @GetMapping("/{id}")
-    public Mono<Employee> getEmployeeById(@PathVariable(name = "id") String id) {
+    public Mono<Employee> getEmployeeById(@PathVariable(name = "id") Integer id) {
         log.info("getEmployeeById");
-        return Mono.just(new Employee("emp1", "Scott", "Tiger", "scott.tiger@oracle.com"));
+        return employeeRepository.findById(id);
     }
 
     @GetMapping
     public Flux<Employee> getEmployees() {
         log.info("getEmployees");
-        return Flux.fromStream(Stream.of(new Employee("emp1", "Scott", "Tiger", "scott.tiger@oracle.com"),
-                new Employee("emp2", "John", "Doe", "john.doe@oracle.com")));
+        return employeeRepository.findAll();
     }
+
+    private EmployeeRepository employeeRepository;
 }
